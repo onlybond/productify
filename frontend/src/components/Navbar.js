@@ -7,7 +7,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 const Navbar = () => {
   const { currentUser } = useContext(AuthContext);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState([]);
 
   const isMobileScreen = useMediaQuery((theme) => theme.breakpoints.down('md'));
 

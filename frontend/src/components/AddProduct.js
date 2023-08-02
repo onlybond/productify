@@ -52,7 +52,9 @@ const AddProduct = () => {
       return () => clearTimeout(timer);
     }
   }, [alertMessage]);
-
+  useEffect(() => {
+    setError({});
+  }, [productCode]);
   const [formData, setFormData] = useState({
     code: '',
     image: '',
@@ -91,6 +93,7 @@ const AddProduct = () => {
     e.preventDefault();
 
     // Reset error states and messages
+    setError({});
     setProductCodeError(false);
     setProductNameError(false);
     setProductSizeError(false);
@@ -173,7 +176,7 @@ const AddProduct = () => {
         setProductQuantity('');
         setProductAmount('');
         setProductDiscount('');
-      }else if (addProductResponse.status === 409) {
+      } else if (addProductResponse.status === 409) {
         // Product with the same code already exists
         setError({ code: 'Product with this code already exists.' });
       } else {
@@ -219,7 +222,7 @@ const AddProduct = () => {
             onChange={(e) => setProductCode(e.target.value)}
             margin="normal"
             required
-            error={!!error.code}
+            error={!!error.code || ''}
             helperText={error.code || ''}
           />
           <TextField
@@ -281,12 +284,17 @@ const AddProduct = () => {
             Add Product
           </Button>
         </form>
-        <Snackbar open={snackbarOpen} autoHideDuration={snackbarTimeout} onClose={handleSnackbarClose}>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={snackbarTimeout}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+        >
           <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
             {snackbarMessage}
             <Box display="flex" alignItems="center">
               <Box width={`${(snackbarTimeout / 3000) * 100}%`} height={2} bgcolor="grey.400" />
-              <Box width={`${((3000 - snackbarTimeout) / 3000) * 100}%`} height={2}  />
+              <Box width={`${((3000 - snackbarTimeout) / 3000) * 100}%`} height={2} />
             </Box>
           </Alert>
         </Snackbar>

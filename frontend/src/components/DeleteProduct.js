@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Box,Typography } from '@mui/material';
+import { TextField, Button, Container, Box, Typography, Snackbar, Alert } from '@mui/material';
 
 const DeleteProduct = () => {
   const [productCode, setProductCode] = useState('');
   const [productDetails, setProductDetails] = useState({});
-  const [errorMessage, setErrorMessage] = useState(null);
   const [showProductDetails, setShowProductDetails] = useState(false);
-
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error');
   const handleFetchProduct = async (e) => {
     e.preventDefault();
 
     // Check if the product code is provided
     if (!productCode.trim()) {
-      setErrorMessage('Please provide a product code.');
+      setSnackbarMessage('Please provide a product code.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
       return;
     }
 
@@ -26,18 +29,19 @@ const DeleteProduct = () => {
           setProductDetails({ ...productDetails, imageURL }); // Update productDetails with the imageURL
         }
         setProductDetails(data);
-        setErrorMessage(null);
         setShowProductDetails(true);
       } else {
         setProductDetails(null);
-        setErrorMessage('Product not found.');
+        setSnackbarMessage('Product not found.');
         setShowProductDetails(false);
+        setSnackbarOpen(true);
       }
     } catch (error) {
       console.error('Error fetching product:', error);
       setProductDetails(null);
-      setErrorMessage('Something went wrong. Please try again later.');
+      setSnackbarMessage('Something went wrong. Please try again later.');
       setShowProductDetails(false);
+      setSnackbarOpen(true);
     }
   };
 
@@ -46,7 +50,8 @@ const DeleteProduct = () => {
 
     // Check if the product code is provided
     if (!productCode.trim()) {
-      setErrorMessage('Please provide a product code.');
+      setSnackbarMessage('Please provide a product code.');
+      setSnackbarOpen(true);
       return;
     }
 
@@ -58,23 +63,25 @@ const DeleteProduct = () => {
       if (response.ok) {
         setProductCode('');
         setProductDetails(null);
-        setErrorMessage(null);
         setShowProductDetails(false);
-        alert('Product deleted successfully.');
+        setSnackbarMessage('Product deleted successfully.');
+        setSnackbarOpen(true);
       } else {
-        setErrorMessage('Error deleting product: ' + data.error);
+        setSnackbarMessage('Error deleting product: ' + data.error);
         setShowProductDetails(false);
+        setSnackbarOpen(true);
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      setErrorMessage('Something went wrong. Please try again later.');
+      setSnackbarMessage('Something went wrong. Please try again later.');
       setShowProductDetails(false);
+      setSnackbarOpen(true);
     }
   };
 
   const handleProductCodeChange = (e) => {
     setProductCode(e.target.value);
-    setErrorMessage(null);
+    setSnackbarOpen(false);
   };
 
   return (
@@ -92,9 +99,9 @@ const DeleteProduct = () => {
             onChange={handleProductCodeChange}
             margin="normal"
             required
-            // Custom validation for required field
-            error={!productCode.trim() && !!errorMessage}
-            helperText={!productCode.trim() && !!errorMessage ? errorMessage : ''}
+          // Custom validation for required field
+          // error={!productCode.trim() && !!errorMessage}
+          // helperText={!productCode.trim() && !!errorMessage ? errorMessage : ''}
           />
           <Button type="submit" variant="contained" color="primary">
             Fetch Product Details
@@ -119,20 +126,18 @@ const DeleteProduct = () => {
             </Button>
           </div>
         )}
-        {errorMessage && (
-          <div
-            style={{
-              margin: '20px 0',
-              padding: '10px',
-              backgroundColor: 'red',
-              color: 'white',
-              textAlign: 'center',
-            }}
-          >
-            {errorMessage}
-          </div>
-        )}
       </Box>
+      {/* Snackbar component to show alerts */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

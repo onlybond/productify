@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Container, Box, Snackbar,Alert,Typography} from '@mui/material';
+import { TextField, Button, Container, Box, Snackbar, Alert, Typography } from '@mui/material';
 
 const UpdateProduct = () => {
   const [productCode, setProductCode] = useState('');
@@ -10,14 +10,22 @@ const UpdateProduct = () => {
   const [hideImagePreview, setHideImagePreview] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const imageFile = e.target.files[0];
-    setProductDetails((prevProductDetails) => ({
-      ...prevProductDetails,
-      image: imageFile,
-      imageURL: null, // Clear the imageURL when a new file is selected
-    }));
+
+    if (imageFile) {
+      // Convert the image file to base64
+      const base64Image = await convertImageToBase64(imageFile);
+
+      // Update productDetails with the new image data
+      setProductDetails((prevProductDetails) => ({
+        ...prevProductDetails,
+        image: base64Image,
+        imageURL: null, // Clear the imageURL when a new file is selected
+      }));
+    }
   };
+
 
   const handleImagePreviewHide = () => {
     setHideImagePreview(true);
@@ -34,7 +42,7 @@ const UpdateProduct = () => {
         setSnackbarMessage('Product updated successfully.');
         setSnackbarOpen(true);
         refreshPage();
-      },3000);
+      }, 3000);
 
       // Clear the timer to avoid unnecessary refreshes
       return () => clearTimeout(timer);
@@ -78,25 +86,50 @@ const UpdateProduct = () => {
 
     setSnackbarOpen(false);
   };
+  const convertImageToBase64 = (imageFile) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Image = reader.result.split(',')[1]; // Extract the base64 encoded image data from the result
+        resolve(base64Image);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(imageFile);
+    });
+  };
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
 
     try {
+      const formData = new FormData();
+      formData.append('name', productDetails.name);
+      formData.append('size', productDetails.size);
+      formData.append('quantity', productDetails.quantity);
+      formData.append('amount', productDetails.amount);
+      formData.append('discount', productDetails.discount);
+
+      // Append the image file only if it's present
+      if (productDetails.image) {
+        formData.append('image', productDetails.image);
+      }
+
       const response = await fetch(`http://localhost:5000/api/products/${productCode}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productDetails),
+        body: formData,
       });
-      const data = await response.json();
 
       if (response.ok) {
         setIsUpdated(true);
         setErrorMessage(null);
+        const data = await response.json();
 
+        // Check if the server returned a new imageURL and update the productDetails state
+        if (data.imageURL) {
+          setProductDetails({ ...productDetails, imageURL: data.imageURL });
+        }
       } else {
+        const data = await response.json();
         // setErrorMessage('Error updating product: ' + data.error);
         setSnackbarMessage('Error updating product: ' + data.error);
       }
@@ -107,6 +140,7 @@ const UpdateProduct = () => {
       setSnackbarMessage('Something went wrong. Please try again later.');
     }
   };
+
   return (
     <Container maxWidth="sm">
       <Box mt={3}>
@@ -177,10 +211,9 @@ const UpdateProduct = () => {
                 required
               />
               <div>
-                {productDetails.image && !hideImagePreview && (
-
+                {productDetails.imageURL && !hideImagePreview && (
                   <img
-                    src={`data:image/jpeg;base64, ${productDetails.image}`} // Use the "data" URL to display the image
+                    src={productDetails.imageURL} // Use the "imageURL" property, not "image"
                     alt={productDetails.name}
                     style={{ maxWidth: '100px', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
                   />
@@ -233,7 +266,13 @@ const UpdateProduct = () => {
           </div>
         )}
       </Box>
-      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        style={{ margin: '20px 0' }}
+      >
         <Alert onClose={handleSnackbarClose} severity={isUpdateSuccessful ? 'success' : 'error'}>
           {snackbarMessage}
         </Alert>
