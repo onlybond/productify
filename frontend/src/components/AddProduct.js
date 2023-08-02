@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Box, Typography, Snackbar, Alert } from '@mui/material';
-
+import config from '../config';
 const AddProduct = () => {
   const [productCode, setProductCode] = useState('')
   const [productName, setProductName] = useState('');
@@ -140,8 +140,10 @@ const AddProduct = () => {
 
     // Proceed with form submission or data processing
     try {
+      const response = await fetch(`${config.apiBaseUrl}/getProducts`, {
+        method: 'GET',
+      });
 
-      const response = await fetch('http://localhost:5000/api/products');
       const data = await response.json();
 
       if (data.some((product) => product.code === formData.code)) {
@@ -157,7 +159,7 @@ const AddProduct = () => {
       formDataToSend.append('amount', productAmount);
       formDataToSend.append('discount', productDiscount);
 
-      const addProductResponse = await fetch('http://localhost:5000/api/add-product', {
+      const addProductResponse = await fetch(`${window.location.origin}:5000/api/add-product`, {
         method: 'POST',
         body: formDataToSend,
       });
@@ -288,7 +290,7 @@ const AddProduct = () => {
           open={snackbarOpen}
           autoHideDuration={snackbarTimeout}
           onClose={handleSnackbarClose}
-          anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
           <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
             {snackbarMessage}

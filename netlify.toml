@@ -1,0 +1,3 @@
+[build]
+  command = "npm run build"  # Command to build the frontend
+  functions = "./backend/netlify-functions"  # Directory where your serverless functions are located

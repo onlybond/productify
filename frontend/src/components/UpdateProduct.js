@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Box, Snackbar, Alert, Typography } from '@mui/material';
-
+import config from '../config';
 const UpdateProduct = () => {
   const [productCode, setProductCode] = useState('');
   const [productDetails, setProductDetails] = useState(null);
@@ -52,7 +52,7 @@ const UpdateProduct = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productCode}`);
+      const response = await fetch(`${config.apiBaseUrl}/updateProduct?code=${productCode}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -114,7 +114,7 @@ const UpdateProduct = () => {
         formData.append('image', productDetails.image);
       }
 
-      const response = await fetch(`http://localhost:5000/api/products/${productCode}`, {
+      const response = await fetch(`${config.apiBaseUrl}/updateProduct?code=${productCode}`, {
         method: 'PUT',
         body: formData,
       });

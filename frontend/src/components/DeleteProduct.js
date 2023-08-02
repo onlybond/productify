@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Box, Typography, Snackbar, Alert } from '@mui/material';
-
+import config from '../config';
 const DeleteProduct = () => {
   const [productCode, setProductCode] = useState('');
   const [productDetails, setProductDetails] = useState({});
@@ -20,7 +20,7 @@ const DeleteProduct = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productCode}`);
+      const response = await fetch(`${config.apiBaseUrl}/deleteProduct?code=${productCode}`);
       const data = await response.json();
       if (response.ok) {
         if (productDetails.image) {
@@ -56,7 +56,7 @@ const DeleteProduct = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${productCode}`, {
+      const response = await fetch(`${config.apiBaseUrl}/deleteProduct?code=${productCode}`, {
         method: 'DELETE',
       });
       const data = await response.json();

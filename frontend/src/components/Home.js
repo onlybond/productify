@@ -46,6 +46,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import html2canvas from 'html2canvas';
 import { openDB, deleteDB } from 'idb'
 import axios from 'axios';
+import config from '../config';
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
@@ -82,7 +83,7 @@ const Home = () => {
           setProducts(data);
           setOpenLoadingDialog(false);
         } else {
-          axios.get('http://localhost:5000/api/products')
+          axios.get(`${config.apiBaseUrl}/getProducts`)
             .then(response => {
               setProducts(response.data);
               setOpenLoadingDialog(false);
@@ -228,7 +229,7 @@ const Home = () => {
   const fetchProductsWithoutImages = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products', {
+      const response = await fetch(`${config.apiBaseUrl}/getProducts`, {
         method: 'GET',
       });
       const data = await response.json();

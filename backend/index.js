@@ -30,7 +30,7 @@ const upload = multer({ storage });
 // Import the product model
 const Product = require('./models/product');
 
-app.get('/api/products', async (req, res) => {
+app.get('/getProducts', async (req, res) => {
   try {
     const products = await Product.find({});
 
@@ -46,9 +46,9 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-app.get('/api/products/:code', async (req, res) => {
+app.get('/getProductByCode', async (req, res) => {
   try {
-    const code = req.params.code;
+    const code = req.query.code;
     const product = await Product.findOne({ code });
 
     if (!product) {
@@ -73,9 +73,9 @@ app.get('/api/products/:code', async (req, res) => {
   }
 });
 
-app.delete('/api/products/:code', async (req, res) => {
+app.delete('/deleteProduct', async (req, res) => {
   try {
-    const { code } = req.params;
+    const code = req.query.code;
 
     // Find the product by code and delete it from the database
     const deletedProduct = await Product.findOneAndDelete({ code });
@@ -90,7 +90,7 @@ app.delete('/api/products/:code', async (req, res) => {
   }
 });
 
-app.post('/api/add-product', upload.single('image'), async (req, res) => {
+app.post('/addProduct', upload.single('image'), async (req, res) => {
   try {
     const { code, name, size, quantity, amount, discount } = req.body;
     const imageFile = req.file;
@@ -120,9 +120,9 @@ app.post('/api/add-product', upload.single('image'), async (req, res) => {
   }
 });
 
-app.put('/api/products/:code', upload.single('image'), async (req, res) => {
+app.put('/updateProduct', upload.single('image'), async (req, res) => {
   try {
-    const { code } = req.params;
+    const code  = req.query.code;
     const { name, size, quantity, amount, discount } = req.body;
     const imageFile = req.file;
 
