@@ -4,10 +4,13 @@ const Product = require('../models/product');
 
 exports.handler = async (event, context) => {
   try {
+    console.log('Event:', event);
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+
+    console.log('Connected to MongoDB');
 
     const products = await Product.find({});
 
@@ -16,7 +19,7 @@ exports.handler = async (event, context) => {
       ...product._doc,
       image: product.image.toString('base64'),
     }));
-
+    console.log('Disconnecting from MongoDB');
     mongoose.disconnect();
 
     return {
@@ -24,6 +27,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify(productsWithBase64Images),
     };
   } catch (error) {
+    console.error('Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error' }),
