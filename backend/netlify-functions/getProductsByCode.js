@@ -31,9 +31,7 @@ exports.handler = async (event, context) => {
         code: product.code,
         name: product.name,
         size: product.size,
-        quantity: product.quantity,
         amount: product.amount,
-        discount: product.discount,
         image: imageBase64,
       }),
     };

@@ -105,10 +105,7 @@ const UpdateProduct = () => {
       const formData = new FormData();
       formData.append('name', productDetails.name);
       formData.append('size', productDetails.size);
-      formData.append('quantity', productDetails.quantity);
       formData.append('amount', productDetails.amount);
-      formData.append('discount', productDetails.discount);
-
       // Append the image file only if it's present
       if (productDetails.image) {
         formData.append('image', productDetails.image);
@@ -185,28 +182,10 @@ const UpdateProduct = () => {
               />
               <TextField
                 fullWidth
-                label="Product Quantity"
-                variant="outlined"
-                value={productDetails.quantity}
-                onChange={(e) => setProductDetails({ ...productDetails, quantity: e.target.value })}
-                margin="normal"
-                required
-              />
-              <TextField
-                fullWidth
                 label="Product Amount"
                 variant="outlined"
                 value={productDetails.amount}
                 onChange={(e) => setProductDetails({ ...productDetails, amount: e.target.value })}
-                margin="normal"
-                required
-              />
-              <TextField
-                fullWidth
-                label="Product Discount"
-                variant="outlined"
-                value={productDetails.discount}
-                onChange={(e) => setProductDetails({ ...productDetails, discount: e.target.value })}
                 margin="normal"
                 required
               />

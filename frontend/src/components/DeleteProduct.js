@@ -118,9 +118,7 @@ const DeleteProduct = () => {
             <p>Code: {productDetails.code}</p>
             <p>Name: {productDetails.name}</p>
             <p>Size: {productDetails.size}</p>
-            <p>Quantity: {productDetails.quantity}</p>
             <p>Amount: {productDetails.amount}</p>
-            <p>Discount: {productDetails.discount}</p>
             <Button type="button" variant="contained" color="secondary" onClick={handleDeleteProduct}>
               Delete Product
             </Button>

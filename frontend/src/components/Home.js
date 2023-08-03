@@ -466,25 +466,7 @@ const Home = () => {
                       fontWeight: 'bold',
                     }}
                   >
-                    Quantity
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      backgroundColor: theme.palette.grey[700],
-                      color: theme.palette.common.white,
-                      fontWeight: 'bold',
-                    }}
-                  >
                     Amount
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      backgroundColor: theme.palette.grey[700],
-                      color: theme.palette.common.white,
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    Discount
                   </TableCell>
                 </Hidden>
                 <TableCell
@@ -542,9 +524,7 @@ const Home = () => {
                                 <div>
                                   <Typography variant="body1">Name: {product.name}</Typography>
                                   <Typography variant="body1">Size: {product.size}</Typography>
-                                  <Typography variant="body1">Quantity: {product.quantity}</Typography>
                                   <Typography variant="body1">Amount: {product.amount}</Typography>
-                                  <Typography variant="body1">Discount: {product.discount}</Typography>
                                 </div>
                               </AccordionDetails>
                             </Accordion>
@@ -562,9 +542,7 @@ const Home = () => {
                           <TableCell>{product.code}</TableCell>
                           <TableCell>{product.name}</TableCell>
                           <TableCell>{product.size}</TableCell>
-                          <TableCell>{product.quantity}</TableCell>
                           <TableCell>{product.amount}</TableCell>
-                          <TableCell>{product.discount}</TableCell>
                           <TableCell>
                             {selectedProducts.includes(product) ? (
                               <Button
@@ -674,38 +652,12 @@ const Home = () => {
                         </TableCell>
                         <TableCell>
                           <TextField
-                            label="Quantity"
-                            name="quantity"
-                            value={
-                              editedProducts[product.code]?.quantity !== undefined
-                                ? editedProducts[product.code]?.quantity
-                                : product.quantity
-                            }
-                            onChange={(e) => handleProductDetailChange(e, product)}
-                            disabled={!Boolean(editedProducts[product.code])}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
                             label="Amount"
                             name="amount"
                             value={
                               editedProducts[product.code]?.amount !== undefined
                                 ? editedProducts[product.code]?.amount
                                 : product.amount
-                            }
-                            onChange={(e) => handleProductDetailChange(e, product)}
-                            disabled={!Boolean(editedProducts[product.code])}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <TextField
-                            label="Discount"
-                            name="discount"
-                            value={
-                              editedProducts[product.code]?.discount !== undefined
-                                ? editedProducts[product.code]?.discount
-                                : product.discount
                             }
                             onChange={(e) => handleProductDetailChange(e, product)}
                             disabled={!Boolean(editedProducts[product.code])}
@@ -739,36 +691,12 @@ const Home = () => {
                             fullWidth
                           />
                           <TextField
-                            label="Quantity"
-                            name="quantity"
-                            value={
-                              editedProducts[product.code]?.quantity !== undefined
-                                ? editedProducts[product.code]?.quantity
-                                : product.quantity
-                            }
-                            onChange={(e) => handleProductDetailChange(e, product)}
-                            disabled={!Boolean(editedProducts[product.code])}
-                            fullWidth
-                          />
-                          <TextField
                             label="Amount"
                             name="amount"
                             value={
                               editedProducts[product.code]?.amount !== undefined
                                 ? editedProducts[product.code]?.amount
                                 : product.amount
-                            }
-                            onChange={(e) => handleProductDetailChange(e, product)}
-                            disabled={!Boolean(editedProducts[product.code])}
-                            fullWidth
-                          />
-                          <TextField
-                            label="Discount"
-                            name="discount"
-                            value={
-                              editedProducts[product.code]?.discount !== undefined
-                                ? editedProducts[product.code]?.discount
-                                : product.discount
                             }
                             onChange={(e) => handleProductDetailChange(e, product)}
                             disabled={!Boolean(editedProducts[product.code])}
@@ -821,9 +749,7 @@ const Home = () => {
                   <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Code</th>
                   <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Name</th>
                   <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Size</th>
-                  <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Quantity</th>
                   <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Amount</th>
-                  <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Discount</th>
                 </tr>
               </thead>
               <tbody>
@@ -835,9 +761,7 @@ const Home = () => {
                     <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{product.code}</td>
                     <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{product.name}</td>
                     <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{editedProducts[product.code]?.size || product.size}</td>
-                    <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{editedProducts[product.code]?.quantity || product.quantity}</td>
                     <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{editedProducts[product.code]?.amount || product.amount}</td>
-                    <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{editedProducts[product.code]?.discount || product.discount}</td>
                   </tr>
                 ))}
               </tbody>

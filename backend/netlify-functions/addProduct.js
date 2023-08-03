@@ -10,7 +10,6 @@ exports.handler = async (event, context) => {
     });
 
     const { code } = event.queryStringParameters;
-    const { name, size, quantity, amount, discount } = JSON.parse(event.body);
     const imageBuffer = Buffer.from(event.body, 'base64');
 
     let product = await Product.findOne({ code });
@@ -25,9 +24,7 @@ exports.handler = async (event, context) => {
 
     product.name = name;
     product.size = size;
-    product.quantity = quantity;
     product.amount = amount;
-    product.discount = discount;
     product.image = imageBuffer;
 
     await product.save();

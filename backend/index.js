@@ -62,9 +62,7 @@ app.get('/getProductByCode', async (req, res) => {
       code: product.code,
       name: product.name,
       size: product.size,
-      quantity: product.quantity,
       amount: product.amount,
-      discount: product.discount,
       image: imageBase64,
     });
   } catch (error) {
@@ -92,7 +90,7 @@ app.delete('/deleteProduct', async (req, res) => {
 
 app.post('/addProduct', upload.single('image'), async (req, res) => {
   try {
-    const { code, name, size, quantity, amount, discount } = req.body;
+    const { code, name, size, amount } = req.body;
     const imageFile = req.file;
 
     if (!imageFile) {
@@ -109,7 +107,7 @@ app.post('/addProduct', upload.single('image'), async (req, res) => {
       return res.status(409).json({ error: 'Product with this code already exists.' });
     }
 
-    const newProduct = new Product({ image, code, name, size, quantity, amount, discount });
+    const newProduct = new Product({ image, code, name, size, amount });
     await newProduct.save();
 
     res.json({ success: true, message: 'Product added successfully' });
@@ -123,7 +121,7 @@ app.post('/addProduct', upload.single('image'), async (req, res) => {
 app.put('/updateProduct', upload.single('image'), async (req, res) => {
   try {
     const code  = req.query.code;
-    const { name, size, quantity, amount, discount } = req.body;
+    const { name, size, amount } = req.body;
     const imageFile = req.file;
 
     // Find the product by code
@@ -136,9 +134,7 @@ app.put('/updateProduct', upload.single('image'), async (req, res) => {
     // Update the product details
     product.name = name;
     product.size = size;
-    product.quantity = quantity;
     product.amount = amount;
-    product.discount = discount;
 
     if (imageFile) {
       // Process the image file here, e.g., save it to the server or a cloud storage service
