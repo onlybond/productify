@@ -1,21 +1,25 @@
-// backend/netlify-functions/updateProduct.js
+// netlify-functions/updateProduct.js
+
 const mongoose = require('mongoose');
+const multer = require('multer');
 const Product = require('../models/product');
 
 exports.handler = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    const { code } = event.queryStringParameters;
-    const imageBuffer = Buffer.from(event.body, 'base64');
+    const code = event.queryStringParameters.code;
+    const { name, size, amount } = JSON.parse(event.body);
+    const imageFile = event.body.image;
 
     let product = await Product.findOne({ code });
 
     if (!product) {
-      mongoose.disconnect();
       return {
         statusCode: 404,
         body: JSON.stringify({ error: 'Product not found.' }),
@@ -25,7 +29,10 @@ exports.handler = async (event, context) => {
     product.name = name;
     product.size = size;
     product.amount = amount;
-    product.image = imageBuffer;
+
+    if (imageFile) {
+      product.image = Buffer.from(imageFile, 'base64');
+    }
 
     await product.save();
 

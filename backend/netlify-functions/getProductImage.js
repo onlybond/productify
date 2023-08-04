@@ -1,7 +1,11 @@
+// netlify-functions/getProductImage.js
+
 const mongoose = require('mongoose');
-const Product = require('../backend/models/product');
+const Product = require('../models/product');
 
 exports.handler = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
@@ -11,6 +15,8 @@ exports.handler = async (event, context) => {
     const code = event.queryStringParameters.code;
     const product = await Product.findOne({ code });
 
+    mongoose.disconnect();
+
     if (!product || !product.image) {
       return {
         statusCode: 404,
@@ -18,18 +24,14 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const response = {
+    return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'image/jpeg', // Set the content type to image/jpeg
+        'Content-Type': 'image/jpeg',
       },
       body: product.image.toString('base64'),
       isBase64Encoded: true,
     };
-
-    mongoose.disconnect();
-
-    return response;
   } catch (error) {
     return {
       statusCode: 500,
