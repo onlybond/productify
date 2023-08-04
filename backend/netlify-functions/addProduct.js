@@ -1,39 +1,46 @@
-// backend/netlify-functions/updateProduct.js
+// netlify-functions/addProduct.js
+
 const mongoose = require('mongoose');
+const multer = require('multer');
 const Product = require('../models/product');
 
 exports.handler = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    const { code } = event.queryStringParameters;
-    const imageBuffer = Buffer.from(event.body, 'base64');
+    const { code, name, size, amount } = JSON.parse(event.body);
+    const imageFile = event.body.image;
 
-    let product = await Product.findOne({ code });
-
-    if (!product) {
-      mongoose.disconnect();
+    if (!imageFile) {
       return {
-        statusCode: 404,
-        body: JSON.stringify({ error: 'Product not found.' }),
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Image is required.' }),
       };
     }
 
-    product.name = name;
-    product.size = size;
-    product.amount = amount;
-    product.image = imageBuffer;
+    const image = Buffer.from(imageFile, 'base64');
 
-    await product.save();
+    const existingProduct = await Product.findOne({ code });
+    if (existingProduct) {
+      return {
+        statusCode: 409,
+        body: JSON.stringify({ error: 'Product with this code already exists.' }),
+      };
+    }
+
+    const newProduct = new Product({ image, code, name, size, amount });
+    await newProduct.save();
 
     mongoose.disconnect();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, message: 'Product updated successfully' }),
+      body: JSON.stringify({ success: true, message: 'Product added successfully' }),
     };
   } catch (error) {
     return {

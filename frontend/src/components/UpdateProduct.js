@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Box, Snackbar, Alert, Typography } from '@mui/material';
 import config from '../config';
 import LazyImage from './lazyImage';
+import SearchIcon from '@mui/icons-material/Search';
 const UpdateProduct = () => {
   const [productCode, setProductCode] = useState('');
   const [productDetails, setProductDetails] = useState(null);
@@ -127,7 +128,7 @@ const UpdateProduct = () => {
             margin="normal"
             required
           />
-          <Button type="submit" variant="contained" color="primary">
+          <Button type="submit" variant="contained" color="primary" startIcon={<SearchIcon/>}>
             Fetch Product Details
           </Button>
         </form>
@@ -189,20 +190,6 @@ const UpdateProduct = () => {
                 Update Product
               </Button>
             </form>
-          </div>
-        )}
-
-        {isUpdated && (
-          <div
-            style={{
-              margin: '20px 0',
-              padding: '10px',
-              backgroundColor: 'green',
-              color: 'white',
-              textAlign: 'center',
-            }}
-          >
-            Product updated successfully!
           </div>
         )}
         {errorMessage && (

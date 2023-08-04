@@ -1,7 +1,11 @@
+// netlify-functions/getProductByCode.js
+
 const mongoose = require('mongoose');
 const Product = require('../models/product');
 
 exports.handler = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
@@ -9,17 +13,16 @@ exports.handler = async (event, context) => {
     });
 
     const code = event.queryStringParameters.code;
-    const product = await Product.findOne({ code });
+    const product = await Product.findOne({ code }, { image: 0 });
+
+    mongoose.disconnect();
 
     if (!product) {
-      mongoose.disconnect();
       return {
         statusCode: 404,
         body: JSON.stringify({ error: 'Product not found.' }),
       };
     }
-
-    mongoose.disconnect();
 
     return {
       statusCode: 200,

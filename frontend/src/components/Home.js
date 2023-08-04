@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   // All the imports...
   useMediaQuery,
@@ -23,29 +23,22 @@ import {
   FormControl,
   Select,
   MenuItem,
-  Snackbar,
-  Alert,
   Checkbox,
   TextField,
-  Modal,
-  Backdrop,
   Fade,
-  FormControlLabel,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  FormGroup,
   IconButton,
   LinearProgress,
-  CircularProgress,
 } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import theme from '../theme';
+import { Link } from 'react-router-dom'
 import DeleteIcon from '@mui/icons-material/Delete';
+import WarningIcon from '@mui/icons-material/Warning';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import html2canvas from 'html2canvas';
-import { openDB, deleteDB } from 'idb'
-import axios from 'axios';
 import config from '../config';
 import LazyImage from './lazyImage';
 const Home = () => {
@@ -59,8 +52,6 @@ const Home = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [editedProducts, setEditedProducts] = useState({});
   const [editModalOpen, setEditModalOpen] = useState(false);
-  // const [previewTableContent, setPreviewTableContent] = useState('');
-  const [visibleImageCodes, setVisibleImageCodes] = useState([])
   const [loading, setLoading] = useState(false);
   const [openLoadingDialog, setOpenLoadingDialog] = useState(true);
   const [clientName, setClientName] = useState('');
@@ -140,19 +131,6 @@ const Home = () => {
       console.error('Error fetching products:', error.message);
     }
   };
-
-  // Helper function to convert Blob to Base64
-  const blobToBase64 = (blob) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        resolve(reader.result);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
 
   useEffect(() => {
     fetchProductsWithoutImages().then(() => {
@@ -394,7 +372,35 @@ const Home = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {
+              {products.length === 0 ? ( // Show message row when no products
+                <tr>
+                  <td colSpan="6">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        padding: '16px',
+                        margin:'16px 8em',
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                      }}
+                    >
+                      <WarningIcon color="error" fontSize="large" />
+                      <p style={{ margin: '8px 0' }}>No products available.</p>
+                      <Button
+                        component={Link}
+                        to="/add-Product"
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddCircleOutlineIcon />}
+                      >
+                        Add Product
+                      </Button>
+                    </Box>
+                  </td>
+                </tr>
+              ) : (
                 sortedProducts
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((product) => (
@@ -480,7 +486,7 @@ const Home = () => {
                       )}
                     </React.Fragment>
                   ))
-              }
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -496,7 +502,7 @@ const Home = () => {
 
       </Box>
       {/* Loading Dialog */}
-      <Dialog open={openLoadingDialog} disableEscapeKeyDown disableBackdropClick>
+      <Dialog open={openLoadingDialog} disableEscapeKeyDown disablebackdropclick='true'>
         <DialogTitle>Products are loading, please wait...</DialogTitle>
         <DialogContent>
           <LinearProgress />
@@ -651,7 +657,7 @@ const Home = () => {
             {/* Client Name */}
             <Typography variant="h6">Client Name: {clientName}</Typography>
             {/* Date */}
-            <Typography variant="h6" align="right">Date: {new Date().toLocaleDateString()}</Typography>
+            <Typography variant="h6" align="right">Date: {currentDate}</Typography>
           </div>
           {/* Preview the edited products here */}
           <TableContainer component={Paper}>

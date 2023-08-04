@@ -1,7 +1,11 @@
+// netlify-functions/deleteProduct.js
+
 const mongoose = require('mongoose');
 const Product = require('../models/product');
 
 exports.handler = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
@@ -9,17 +13,16 @@ exports.handler = async (event, context) => {
     });
 
     const code = event.queryStringParameters.code;
-    const deletedProduct = await Product.findOneAndDelete({ code }, { image: 0 }); // Exclude the 'image' field
+    const deletedProduct = await Product.findOneAndDelete({ code });
+
+    mongoose.disconnect();
 
     if (!deletedProduct) {
-      mongoose.disconnect();
       return {
         statusCode: 404,
         body: JSON.stringify({ error: 'Product not found.' }),
       };
     }
-
-    mongoose.disconnect();
 
     return {
       statusCode: 200,

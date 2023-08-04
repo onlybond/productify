@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Box, Typography, Snackbar, Alert } from '@mui/material';
 import LazyImage from './lazyImage';
 import config from '../config';
+import SearchIcon from '@mui/icons-material/Search';
 const DeleteProduct = () => {
   const [productCode, setProductCode] = useState('');
   const [productDetails, setProductDetails] = useState({});
@@ -99,7 +100,7 @@ const DeleteProduct = () => {
           // error={!productCode.trim() && !!errorMessage}
           // helperText={!productCode.trim() && !!errorMessage ? errorMessage : ''}
           />
-          <Button type="submit" variant="contained" color="primary">
+          <Button type="submit" variant="contained" color="primary" startIcon={<SearchIcon/>}>
             Fetch Product Details
           </Button>
         </form>
@@ -116,7 +117,7 @@ const DeleteProduct = () => {
             <p>Name: {productDetails.name}</p>
             <p>Size: {productDetails.size}</p>
             <p>Amount: {productDetails.amount}</p>
-            <Button type="button" variant="contained" color="secondary" onClick={handleDeleteProduct}>
+            <Button type="button" variant="contained" color="secondary" onClick={handleDeleteProduct} >
               Delete Product
             </Button>
           </div>
