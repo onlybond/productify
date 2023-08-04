@@ -1,4 +1,3 @@
-// backend/netlify-functions/getProduct.js
 const mongoose = require('mongoose');
 const Product = require('../models/product');
 
@@ -20,9 +19,6 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Convert the image buffer to Base64 before sending it to the frontend
-    const imageBase64 = product.image.toString('base64');
-
     mongoose.disconnect();
 
     return {
@@ -31,10 +27,7 @@ exports.handler = async (event, context) => {
         code: product.code,
         name: product.name,
         size: product.size,
-        quantity: product.quantity,
         amount: product.amount,
-        discount: product.discount,
-        image: imageBase64,
       }),
     };
   } catch (error) {

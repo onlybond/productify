@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Box, Typography, Snackbar, Alert } from '@mui/material';
+import LazyImage from './lazyImage';
 import config from '../config';
 const DeleteProduct = () => {
   const [productCode, setProductCode] = useState('');
@@ -20,14 +21,9 @@ const DeleteProduct = () => {
     }
 
     try {
-      const response = await fetch(`${config.apiBaseUrl}/deleteProduct?code=${productCode}`);
+      const response = await fetch(`${config.apiBaseUrl}/getProductByCode?code=${productCode}`);
       const data = await response.json();
       if (response.ok) {
-        if (productDetails.image) {
-          // Convert the binary image data to a URL
-          const imageURL = URL.createObjectURL(new Blob([productDetails.image]));
-          setProductDetails({ ...productDetails, imageURL }); // Update productDetails with the imageURL
-        }
         setProductDetails(data);
         setShowProductDetails(true);
       } else {
@@ -110,17 +106,16 @@ const DeleteProduct = () => {
         {showProductDetails && productDetails && (
           <div>
             <h2>Product Details</h2>
-            <img
-              src={`data:image/jpeg;base64, ${productDetails.image}`} // Use the "data" URL to display the image
+            <LazyImage
+              src={`${config.apiBaseUrl}/getProductImage?code=${productDetails.code}`} // Use the "data" URL to display the image
               alt={productDetails.name}
-              style={{ maxWidth: '60vw', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
+              style={{ maxWidth: '300px', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
+              label={'image loading.....'}
             />
             <p>Code: {productDetails.code}</p>
             <p>Name: {productDetails.name}</p>
             <p>Size: {productDetails.size}</p>
-            <p>Quantity: {productDetails.quantity}</p>
             <p>Amount: {productDetails.amount}</p>
-            <p>Discount: {productDetails.discount}</p>
             <Button type="button" variant="contained" color="secondary" onClick={handleDeleteProduct}>
               Delete Product
             </Button>
