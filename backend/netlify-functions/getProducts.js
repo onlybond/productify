@@ -1,4 +1,3 @@
-// backend/netlify-functions/getProducts.js
 const mongoose = require('mongoose');
 const Product = require('../models/product');
 
@@ -12,19 +11,14 @@ exports.handler = async (event, context) => {
 
     console.log('Connected to MongoDB');
 
-    const products = await Product.find({});
+    const products = await Product.find({}, { image: 0 }); // Exclude the 'image' field
 
-    // Convert the image buffer to Base64 for each product
-    const productsWithBase64Images = products.map((product) => ({
-      ...product._doc,
-      image: product.image.toString('base64'),
-    }));
     console.log('Disconnecting from MongoDB');
     mongoose.disconnect();
 
     return {
       statusCode: 200,
-      body: JSON.stringify(productsWithBase64Images),
+      body: JSON.stringify(products),
     };
   } catch (error) {
     console.error('Error:', error);

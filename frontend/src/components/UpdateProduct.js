@@ -1,34 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Container, Box, Snackbar, Alert, Typography } from '@mui/material';
 import config from '../config';
+import LazyImage from './lazyImage';
 const UpdateProduct = () => {
   const [productCode, setProductCode] = useState('');
   const [productDetails, setProductDetails] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isUpdated, setIsUpdated] = useState(false); // Track if the product is updated
   const [isUpdateSuccessful, setIsUpdateSuccessful] = useState(false);
-  const [hideImagePreview, setHideImagePreview] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [hideImage, setHideImage] = useState(false);
   const handleImageChange = async (e) => {
-    const imageFile = e.target.files[0];
-
-    if (imageFile) {
-      // Convert the image file to base64
-      const base64Image = await convertImageToBase64(imageFile);
-
-      // Update productDetails with the new image data
-      setProductDetails((prevProductDetails) => ({
-        ...prevProductDetails,
-        image: base64Image,
-        imageURL: null, // Clear the imageURL when a new file is selected
-      }));
-    }
-  };
-
-
-  const handleImagePreviewHide = () => {
-    setHideImagePreview(true);
+    setHideImage(!hideImage);
   };
   // Function to refresh the page
   const refreshPage = () => {
@@ -52,7 +36,7 @@ const UpdateProduct = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${config.apiBaseUrl}/updateProduct?code=${productCode}`);
+      const response = await fetch(`${config.apiBaseUrl}/getProductByCode?code=${productCode}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -85,17 +69,6 @@ const UpdateProduct = () => {
     }
 
     setSnackbarOpen(false);
-  };
-  const convertImageToBase64 = (imageFile) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64Image = reader.result.split(',')[1]; // Extract the base64 encoded image data from the result
-        resolve(base64Image);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(imageFile);
-    });
   };
 
   const handleUpdateProduct = async (e) => {
@@ -190,13 +163,14 @@ const UpdateProduct = () => {
                 required
               />
               <div>
-                {productDetails.imageURL && !hideImagePreview && (
-                  <img
-                    src={productDetails.imageURL} // Use the "imageURL" property, not "image"
-                    alt={productDetails.name}
-                    style={{ maxWidth: '100px', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
-                  />
-                )}
+                {hideImage ? null : (
+                  
+                    <LazyImage
+                      src={`${config.apiBaseUrl}/getProductImage?code=${productDetails.code}`} // Use the "imageURL" property, not "image"
+                      alt={productDetails.name}
+                      style={{ maxWidth: '100px', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
+                    />
+                  )}
               </div>
               <TextField
                 fullWidth

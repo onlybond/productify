@@ -32,15 +32,9 @@ const Product = require('./models/product');
 
 app.get('/getProducts', async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find({}, { image: 0 }); // Exclude image data
 
-    // Convert the image buffer to Base64 for each product
-    const productsWithBase64Images = products.map((product) => ({
-      ...product._doc,
-      image: product.image.toString('base64'),
-    }));
-
-    res.json(productsWithBase64Images);
+    res.json(products);
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -49,27 +43,24 @@ app.get('/getProducts', async (req, res) => {
 app.get('/getProductByCode', async (req, res) => {
   try {
     const code = req.query.code;
-    const product = await Product.findOne({ code });
+    const product = await Product.findOne({ code },{image:0});
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found.' });
     }
-
-    // Convert the image buffer to Base64 before sending it to the frontend
-    const imageBase64 = product.image.toString('base64');
 
     res.json({
       code: product.code,
       name: product.name,
       size: product.size,
       amount: product.amount,
-      image: imageBase64,
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
     console.error('Error fetching product:', error.message);
   }
 });
+
 
 app.delete('/deleteProduct', async (req, res) => {
   try {
@@ -118,9 +109,29 @@ app.post('/addProduct', upload.single('image'), async (req, res) => {
   }
 });
 
+// Add this route to your existing index.js file
+
+app.get('/getProductImage', async (req, res) => {
+  try {
+    const code = req.query.code;
+    const product = await Product.findOne({ code });
+
+    if (!product || !product.image) {
+      return res.status(404).json({ error: 'Product not found or no image available.' });
+    }
+
+    res.set('Content-Type', 'image/jpeg'); // Set the content type to image/jpeg
+    res.send(product.image);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error fetching product image:', error.message);
+  }
+});
+
+
 app.put('/updateProduct', upload.single('image'), async (req, res) => {
   try {
-    const code  = req.query.code;
+    const code = req.query.code;
     const { name, size, amount } = req.body;
     const imageFile = req.file;
 

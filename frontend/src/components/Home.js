@@ -47,6 +47,7 @@ import html2canvas from 'html2canvas';
 import { openDB, deleteDB } from 'idb'
 import axios from 'axios';
 import config from '../config';
+import LazyImage from './lazyImage';
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
@@ -65,111 +66,6 @@ const Home = () => {
   const [clientName, setClientName] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const db = await openDB('my-database', 1, {
-          upgrade(db) {
-            db.createObjectStore('products');
-          },
-        });
-
-        const tx = db.transaction('products', 'readonly');
-        const store = tx.objectStore('products');
-        const data = await store.get('productData');
-
-        if (data) {
-          setProducts(data);
-          setOpenLoadingDialog(false);
-        } else {
-          axios.get(`${config.apiBaseUrl}/getProducts`)
-            .then(response => {
-              setProducts(response.data);
-              setOpenLoadingDialog(false);
-
-              // Store the fetched data in IndexedDB
-              const writeTx = db.transaction('products', 'readwrite');
-              const writeStore = writeTx.objectStore('products');
-              writeStore.put(response.data, 'productData');
-            })
-            .catch(error => {
-              console.error('Error fetching products:', error);
-              setOpenLoadingDialog(false);
-            });
-        }
-      } catch (error) {
-        console.error('Error accessing IndexedDB:', error);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const handleUnload = async () => {
-      try {
-        // Delete the IndexedDB database
-        await openDB.delete('my-database');
-      } catch (error) {
-        console.error('Error deleting IndexedDB:', error);
-      }
-    };
-
-    window.addEventListener('beforeunload', handleUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleUnload);
-    };
-  }, []);
-  // Separate Image component for lazy loading
-  const handleLazyImageLoad = (code) => {
-    setVisibleImageCodes((prevVisibleImageCodes) => [...prevVisibleImageCodes, code]);
-  };
-
-  const LazyImage = ({ src, alt, style, code }) => {
-    const [isVisible, setIsVisible] = useState(visibleImageCodes.includes(code));
-
-    const imageRef = useRef();
-
-    const handleIntersection = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.target === imageRef.current) {
-          setIsVisible(true);
-          observer.unobserve(imageRef.current);
-        }
-      });
-    };
-
-    useEffect(() => {
-      const observer = new IntersectionObserver(handleIntersection, {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1,
-      });
-
-      if (imageRef.current) {
-        observer.observe(imageRef.current);
-      }
-
-      return () => {
-        if (imageRef.current) {
-          observer.unobserve(imageRef.current);
-        }
-      };
-    }, []);
-
-    return isVisible ? (
-      <img ref={imageRef} src={src} alt={alt} style={style} />
-    ) : (
-      <div
-        ref={imageRef}
-        style={{ height: style.maxHeight, width: style.maxWidth }}
-        onLoad={() => handleLazyImageLoad(code)} // Call the function to mark the image as visible when it's loaded
-      />
-    );
-  };
-
   const handlePreview = () => {
     setPreviewOpen(true);
   };
@@ -223,9 +119,6 @@ const Home = () => {
     }
   };
 
-
-
-  // Function to fetch products without images
   const fetchProductsWithoutImages = async () => {
     try {
       setLoading(true);
@@ -233,13 +126,33 @@ const Home = () => {
         method: 'GET',
       });
       const data = await response.json();
-      setProducts(data);
+      // Exclude images from the initial fetch
+      const productsWithoutImages = data.map(product => ({
+        ...product
+      }));
+
+      // Fetch images one by one and update the products array
+
+      setProducts(productsWithoutImages);
       setLoading(false);
     } catch (error) {
       setLoading(false);
       console.error('Error fetching products:', error.message);
     }
   };
+
+  // Helper function to convert Blob to Base64
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
 
   useEffect(() => {
     fetchProductsWithoutImages().then(() => {
@@ -492,7 +405,7 @@ const Home = () => {
                             <Accordion>
                               <AccordionSummary>
                                 <LazyImage
-                                  src={`data:image/jpeg;base64, ${product.image}`}
+                                  src={`${config.apiBaseUrl}/getProductsImage?code=${product.code}`}
                                   alt={product.name}
                                   style={{ maxWidth: '50px', boxShadow: '0px 0px 5px grey' }}
                                 />
@@ -534,7 +447,7 @@ const Home = () => {
                         <TableRow>
                           <TableCell>
                             <LazyImage
-                              src={`data:image/jpeg;base64, ${product.image}`}
+                              src={`${config.apiBaseUrl}/getProductImage?code=${product.code}`}
                               alt={product.name}
                               style={{ maxWidth: '50px', boxShadow: '0px 0px 5px grey' }}
                             />
@@ -756,7 +669,7 @@ const Home = () => {
                 {selectedProducts.map((product) => (
                   <tr key={product.code}>
                     <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>
-                      <img src={`data:image/jpeg;base64, ${product.image}`} alt={product.name} style={{ maxWidth: '100px' }} />
+                      <img src={`${config.apiBaseUrl}/getProductImage?code=${product.code}`} alt={product.name} style={{ maxWidth: '100px' }} />
                     </td>
                     <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{product.code}</td>
                     <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>{product.name}</td>

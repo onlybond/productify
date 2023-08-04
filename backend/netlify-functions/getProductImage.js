@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Product = require('../models/product');
+const Product = require('../backend/models/product');
 
 exports.handler = async (event, context) => {
   try {
@@ -9,22 +9,27 @@ exports.handler = async (event, context) => {
     });
 
     const code = event.queryStringParameters.code;
-    const deletedProduct = await Product.findOneAndDelete({ code }, { image: 0 }); // Exclude the 'image' field
+    const product = await Product.findOne({ code });
 
-    if (!deletedProduct) {
-      mongoose.disconnect();
+    if (!product || !product.image) {
       return {
         statusCode: 404,
-        body: JSON.stringify({ error: 'Product not found.' }),
+        body: JSON.stringify({ error: 'Product not found or no image available.' }),
       };
     }
 
+    const response = {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'image/jpeg', // Set the content type to image/jpeg
+      },
+      body: product.image.toString('base64'),
+      isBase64Encoded: true,
+    };
+
     mongoose.disconnect();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Product deleted successfully.' }),
-    };
+    return response;
   } catch (error) {
     return {
       statusCode: 500,
