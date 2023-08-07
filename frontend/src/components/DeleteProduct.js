@@ -22,7 +22,7 @@ const DeleteProduct = () => {
     }
 
     try {
-      const response = await fetch(`${config.apiBaseUrl}/getProductByCode?code=${productCode}`);
+      const response = await fetch(`${config.apiBaseUrl}/getProductsByCode?code=${productCode}`);
       const data = await response.json();
       if (response.ok) {
         setProductDetails(data);
@@ -62,6 +62,7 @@ const DeleteProduct = () => {
         setProductDetails(null);
         setShowProductDetails(false);
         setSnackbarMessage('Product deleted successfully.');
+        setSnackbarSeverity('success');
         setSnackbarOpen(true);
       } else {
         setSnackbarMessage('Error deleting product: ' + data.error);
@@ -129,8 +130,9 @@ const DeleteProduct = () => {
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        severity={snackbarSeverity}
       >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
+        <Alert  onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

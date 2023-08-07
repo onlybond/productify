@@ -37,28 +37,28 @@ const UpdateProduct = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${config.apiBaseUrl}/getProductByCode?code=${productCode}`);
+      const response = await fetch(`${config.apiBaseUrl}/getProductsByCode?code=${productCode}`);
       const responseBody = await response.text(); // Get the response body as text
 
-    console.log('Response body:', responseBody); // Log the response body
+      console.log('Response body:', responseBody); // Log the response body
 
-    if (response.ok) {
-      const data = JSON.parse(responseBody); // Try to parse the response body as JSON
+      if (response.ok) {
+        const data = JSON.parse(responseBody); // Try to parse the response body as JSON
 
-      setProductDetails(data);
-      setErrorMessage(null);
-    } else {
+        setProductDetails(data);
+        setErrorMessage(null);
+      } else {
+        setProductDetails(null);
+        setSnackbarMessage('Product not found.');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
       setProductDetails(null);
-      setSnackbarMessage('Product not found.');
+      setSnackbarMessage('Error updating product. Please try again later.');
       setSnackbarOpen(true);
     }
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    setProductDetails(null);
-    setSnackbarMessage('Error updating product. Please try again later.');
-    setSnackbarOpen(true);
-  }
-};
+  };
   const handleSnackbarClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -77,7 +77,9 @@ const UpdateProduct = () => {
       formData.append('amount', productDetails.amount);
       // Append the image file only if it's present
       if (productDetails.image) {
-        formData.append('image', productDetails.image);
+        const base64Image = await getBase64Image(productDetails.image);
+        formData.append('image', base64Image);
+        // formData.append('image', productDetails.image);
       }
 
       const response = await fetch(`${config.apiBaseUrl}/updateProduct?code=${productCode}`, {
@@ -107,6 +109,19 @@ const UpdateProduct = () => {
     }
   };
 
+  const getBase64Image = (image) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        resolve(event.target.result.split(',')[1]);
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+      reader.readAsDataURL(image);
+    });
+  };
+
   return (
     <Container maxWidth="sm">
       <Box mt={3}>
@@ -123,7 +138,7 @@ const UpdateProduct = () => {
             margin="normal"
             required
           />
-          <Button type="submit" variant="contained" color="primary" startIcon={<SearchIcon/>}>
+          <Button type="submit" variant="contained" color="primary" startIcon={<SearchIcon />}>
             Fetch Product Details
           </Button>
         </form>
@@ -160,13 +175,13 @@ const UpdateProduct = () => {
               />
               <div>
                 {hideImage ? null : (
-                  
-                    <LazyImage
-                      src={`${config.apiBaseUrl}/getProductImage?code=${productDetails.code}`} // Use the "imageURL" property, not "image"
-                      alt={productDetails.name}
-                      style={{ maxWidth: '100px', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
-                    />
-                  )}
+
+                  <LazyImage
+                    src={`${config.apiBaseUrl}/getProductImage?code=${productDetails.code}`} // Use the "imageURL" property, not "image"
+                    alt={productDetails.name}
+                    style={{ maxWidth: '100px', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
+                  />
+                )}
               </div>
               <TextField
                 fullWidth
@@ -177,7 +192,6 @@ const UpdateProduct = () => {
                 onChange={(e) => setProductDetails({ ...productDetails, image: e.target.files[0] })}
                 margin="normal"
                 InputLabelProps={{ shrink: true }}
-                required
               />
               {/* Add more fields for other product details */}
 
