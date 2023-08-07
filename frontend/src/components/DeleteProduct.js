@@ -110,7 +110,7 @@ const DeleteProduct = () => {
             <LazyImage
               src={`${config.apiBaseUrl}/getProductImage?code=${productDetails.code}`} // Use the "data" URL to display the image
               alt={productDetails.name}
-              style={{ maxWidth: '300px', boxShadow: '0px 0px 10px grey', borderRadius: '0.7rem' }}
+              style={{ maxWidth: '300px', }}
               label={'image loading.....'}
             />
             <p>Code: {productDetails.code}</p>

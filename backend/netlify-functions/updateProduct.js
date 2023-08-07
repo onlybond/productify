@@ -1,7 +1,6 @@
 // netlify-functions/updateProduct.js
 
 const mongoose = require('mongoose');
-const multer = require('multer');
 const Product = require('../models/product');
 
 exports.handler = async (event, context) => {

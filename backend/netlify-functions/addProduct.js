@@ -1,7 +1,4 @@
-// netlify-functions/addProduct.js
-
 const mongoose = require('mongoose');
-const multer = require('multer');
 const Product = require('../models/product');
 
 exports.handler = async (event, context) => {
@@ -13,17 +10,17 @@ exports.handler = async (event, context) => {
       useUnifiedTopology: true,
     });
 
-    const { code, name, size, amount } = JSON.parse(event.body);
-    const imageFile = event.body.image;
+    const { code, name, size, amount, image } = JSON.parse(event.body);
 
-    if (!imageFile) {
+    if (!image) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'Image is required.' }),
       };
     }
 
-    const image = Buffer.from(imageFile, 'base64');
+    // Decode the base64 image data
+    const imageBuffer = Buffer.from(image, 'base64');
 
     const existingProduct = await Product.findOne({ code });
     if (existingProduct) {
@@ -32,8 +29,7 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ error: 'Product with this code already exists.' }),
       };
     }
-
-    const newProduct = new Product({ image, code, name, size, amount });
+    const newProduct = new Product({ image: imageBuffer, code, name, size, amount });
     await newProduct.save();
 
     mongoose.disconnect();

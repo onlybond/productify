@@ -38,16 +38,6 @@ const AddProduct = () => {
       };
     }
   }, [snackbarOpen]);
-  // Function to clear the alert message after 3 seconds
-  useEffect(() => {
-    if (alertMessage) {
-      const timer = setTimeout(() => {
-        setAlertMessage(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [alertMessage]);
   const [formData, setFormData] = useState({
     code: '',
     image: '',
@@ -102,18 +92,26 @@ const AddProduct = () => {
 
   const handleImageChange = (e) => {
     const imageFile = e.target.files[0];
-
+  
     if (imageFile) {
       setProductImageError(false);
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        image: imageFile,
-      }));
+  
+      // Convert the image to base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Image = reader.result.split(',')[1]; 
+        // Update the formData state
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          image: base64Image,
+        }));
+      };
+      reader.readAsDataURL(imageFile);
     } else {
       setProductImageError(true);
     }
   };
-console.log(formData);
+
 const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -144,18 +142,23 @@ const handleSubmit = async (e) => {
     setProductAmountError(true);
     return;
   }
-
+  
   // Proceed with form submission or data processing
   try {
-    const formDataToSend = new FormData();
-    formDataToSend.append('image', formData.image);
-    formDataToSend.append('code', productCode);
-    formDataToSend.append('name', productName);
-    formDataToSend.append('size', productSize);
-    formDataToSend.append('amount', productAmount);
+    const productData = {
+      image: formData.image,
+      code: formData.code,
+      name: formData.name,
+      size: formData.size,
+      amount: formData.amount,
+    };
+    console.log(JSON.stringify(productData));
     const addProductResponse = await fetch(`${config.apiBaseUrl}/addProduct`, {
       method: 'POST',
-      body: formDataToSend,
+      headers: {
+        'Content-Type': 'application/json', // Make sure the content type is correct
+      },
+      body: JSON.stringify(productData),
     });
 
     if (addProductResponse.ok) {
@@ -172,7 +175,7 @@ const handleSubmit = async (e) => {
       // Product with the same code already exists
       setProductCodeError(true);
     } else {
-      console.log(formDataToSend);
+      console.log(productData);
       // Display error message
       setSnackbarSeverity('error');
       setSnackbarMessage('Something went wrong. Please try again later.');
@@ -180,6 +183,7 @@ const handleSubmit = async (e) => {
     }
   } catch (error) {
     // Display error message
+    // console.log(error);
     setSnackbarSeverity('error');
     setSnackbarMessage('Something went wrong. Please try again later.');
     setSnackbarOpen(true);

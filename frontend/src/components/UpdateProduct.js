@@ -38,32 +38,27 @@ const UpdateProduct = () => {
 
     try {
       const response = await fetch(`${config.apiBaseUrl}/getProductByCode?code=${productCode}`);
-      const data = await response.json();
+      const responseBody = await response.text(); // Get the response body as text
 
-      if (response.ok) {
-        if (data.image) {
-          // Convert the binary image data to a URL
-          const imageURL = URL.createObjectURL(new Blob([data.image]));
-          // Update productDetails with the imageURL
-          setProductDetails({ ...data, imageURL });
-        } else {
-          setProductDetails(data);
-        }
-        setErrorMessage(null);
-      } else {
-        setProductDetails(null);
-        // setErrorMessage('Product not found');
-        setSnackbarMessage('Product not found.');
-        setSnackbarOpen(true);
-      }
-    } catch (error) {
-      console.error('Error fetching product:', error);
+    console.log('Response body:', responseBody); // Log the response body
+
+    if (response.ok) {
+      const data = JSON.parse(responseBody); // Try to parse the response body as JSON
+
+      setProductDetails(data);
+      setErrorMessage(null);
+    } else {
       setProductDetails(null);
-      // setErrorMessage('Something went wrong. Please try again later.');
-      setSnackbarMessage('Error updating product. Please try again later.');
+      setSnackbarMessage('Product not found.');
       setSnackbarOpen(true);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    setProductDetails(null);
+    setSnackbarMessage('Error updating product. Please try again later.');
+    setSnackbarOpen(true);
+  }
+};
   const handleSnackbarClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;

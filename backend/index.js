@@ -7,10 +7,14 @@ const port = 5000;
 
 // Load environment variables from .env file
 require('dotenv').config();
-
+const corsOptions = {
+  origin: 'http://localhost:3000', // Allow requests from this origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
+  credentials: true, // Allow cookies and HTTP authentication
+};
 // Middleware
-app.use(express.json());
-app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(cors(corsOptions));
 
 // Connect to MongoDB
 const mongoURI = process.env.MONGODB_URI;
@@ -43,7 +47,7 @@ app.get('/getProducts', async (req, res) => {
 app.get('/getProductByCode', async (req, res) => {
   try {
     const code = req.query.code;
-    const product = await Product.findOne({ code },{image:0});
+    const product = await Product.findOne({ code }, { image: 0 });
 
     if (!product) {
       return res.status(404).json({ error: 'Product not found.' });
@@ -79,19 +83,12 @@ app.delete('/deleteProduct', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-app.post('/addProduct', upload.single('image'), async (req, res) => {
+app.post('/addProduct', async (req, res) => {
   try {
-    const { code, name, size, amount } = req.body;
-    const imageFile = req.file;
+    const { code, name, size, amount, image } = req.body;
 
-    if (!imageFile) {
-      return res.status(400).json({ error: 'Image is required.' });
-    }
-
-    // Process the image file here, e.g., save it to the server or a cloud storage service
-    // For now, we'll just store the image as binary data in the database
-    const image = imageFile.buffer;
+    // Convert the base64 image data to a Buffer
+    const imageBuffer = Buffer.from(image, 'base64');
 
     // Check if a product with the same code already exists
     const existingProduct = await Product.findOne({ code });
@@ -99,7 +96,7 @@ app.post('/addProduct', upload.single('image'), async (req, res) => {
       return res.status(409).json({ error: 'Product with this code already exists.' });
     }
 
-    const newProduct = new Product({ image, code, name, size, amount });
+    const newProduct = new Product({ image: imageBuffer, code, name, size, amount });
     await newProduct.save();
 
     res.json({ success: true, message: 'Product added successfully' });
